@@ -38,12 +38,15 @@ func getInput(at url: URL) throws -> String {
 func findValidPasswords(input: String) {
 	let components = input.components(separatedBy: "\n")
 	let passwordComponents = components.compactMap { Password(line: $0) }
-	let validPassowrds = passwordComponents.compactMap { $0.isValid ? $0 : nil }
+	let validPassowrds = passwordComponents.compactMap { $0.isValid(policy: .one) ? $0 : nil }
 	let count = validPassowrds.count
 
 	print("Lines in file: \(components.count)")
 	print("Password components: \(passwordComponents.count)")
 	print("Found \(count) valid passwords")
+
+	let validTwoPasswords = passwordComponents.compactMap { $0.isValid(policy: .two) ? $0 : nil }
+	print("Found \(validTwoPasswords.count) valid two passwords")
 }
 
 
@@ -67,6 +70,11 @@ extension String {
 
 
 struct Password {
+
+	enum Policy {
+		case one, two
+	}
+
 	let lower: Int
 	let upper: Int
 	let special: String
@@ -90,15 +98,32 @@ struct Password {
 		self.value = password
 	}
 
-	var isValid: Bool {
+	func isValid(policy: Policy) -> Bool {
 		let characters = Array(value)
-		let counts = characters.reduce(into: [:]) { $0[$1, default: 0] += 1 }
-		let character = Character(special)
 
-		guard let occurrences = counts[character] else { return false }
+		switch policy {
+			case .one:
+				let counts = characters.reduce(into: [:]) { $0[$1, default: 0] += 1 }
+				let character = Character(special)
 
-		let result = occurrences <= upper && lower <= occurrences
+				guard let occurrences = counts[character] else { return false }
 
-		return result
+				let result = occurrences <= upper && lower <= occurrences
+
+				return result
+			case .two:
+				let firstIndex = lower - 1
+				let secondIndex = upper - 1
+
+				guard characters.indices.contains(secondIndex) else { return false }
+
+				let firstIndexCharacter = String(characters[firstIndex])
+				let isFirst = firstIndexCharacter == special
+
+				let secondIndexCharacter = String(characters[secondIndex])
+				let isSecond = secondIndexCharacter == special
+
+				return isFirst != isSecond
+		}
 	}
 }
