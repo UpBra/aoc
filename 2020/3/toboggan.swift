@@ -16,6 +16,8 @@ func main() {
 		let input = try getInput(at: url)
 		let tobo = Toboggan(input: input)
 		tobo.printCheapModel()
+
+		tobo.partTwo()
 	} catch {
 		print("failed to get input")
 	}
@@ -73,5 +75,46 @@ class Toboggan {
 		}
 
 		print("Count of trees: \(trees)")
+	}
+
+	func partTwo() {
+		let oneOne = countOfTrees(x: 1, y: 1)
+		print("trees in right 1 down 1: \(oneOne)")
+
+		let threeOne = countOfTrees(x: 3, y: 1)
+		print("trees in right 3 down 1: \(threeOne)")
+
+		let fiveOne = countOfTrees(x: 5, y: 1)
+		let sevenOne = countOfTrees(x: 7, y: 1)
+		let oneTwo = countOfTrees(x: 1, y: 2)
+
+		let multiplied = oneOne * threeOne * fiveOne * sevenOne * oneTwo
+		print("multiplied = \(multiplied)")
+	}
+
+	func countOfTrees(x: Int, y: Int) -> Int {
+		var trees = 0
+		var count = 1
+
+		for index in stride(from: y, to: input.count, by: y) {
+			defer { count += 1 }
+			guard input.indices.contains(index) else { continue }
+
+			let row = input[index]
+
+			if row.isEmpty { continue }
+
+			let calculated = Int(count * x)
+			let column = calculated % row.count
+
+			if row.indices.contains(column) {
+				let value = row[column]
+				if value == "#" {
+					trees += 1
+				}
+			}
+		}
+
+		return trees
 	}
 }
