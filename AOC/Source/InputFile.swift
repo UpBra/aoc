@@ -1,28 +1,24 @@
 // —————————————————————————————————————————————————————————————————————————
 //
-// Array+Extensions.swift
-// Copyright © 2020 GLEESH. All rights reserved.
+//  InputFile.swift
+//  Copyright © 2020 GLEESH. All rights reserved.
 //
 // —————————————————————————————————————————————————————————————————————————
 
 import Foundation
 
 
-extension Array {
-	public subscript(safeIndex index: Int) -> Element? {
-		guard index >= 0, index < endIndex else {
-			return nil
-		}
+struct InputFile {
 
-		return self[index]
-	}
-}
+	let file: String
 
+	init?(filePath: String) {
+		let currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+		let url = URL(fileURLWithPath: filePath, relativeTo: currentDirectoryURL)
 
-extension Array {
-	func chunked(by chunkSize: Int) -> [[Element]] {
-		return stride(from: 0, to: self.count, by: chunkSize).map {
-			Array(self[$0..<Swift.min($0 + chunkSize, self.count)])
-		}
+		guard let data = try? Data(contentsOf: url) else { return nil }
+		guard let dataString = String(data: data, encoding: .utf8) else { return nil }
+
+		self.file = dataString
 	}
 }
